@@ -1,0 +1,3 @@
+# Container config: inside docker the relay must bind all interfaces of the container
+# netns; isolation comes from the compose port mapping pinning it to the host loopback.
+bind = "0.0.0.0:7200"

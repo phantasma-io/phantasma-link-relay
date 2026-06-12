@@ -1,0 +1,28 @@
+# Phantasma Link v5 relay configuration. Every key is optional; the values below are
+# the built-in defaults. Copy to config.toml and pass the path as the first argument:
+#   phantasma-link-relay config.toml
+
+# Plain-WS listen address. TLS terminates at the reverse proxy on link.phantasma.info
+# (see the hosting kit Caddyfile); never expose this port directly.
+bind = "localhost:7200"
+
+# Per-frame byte cap (spec section 18: 1 MiB). Larger logical messages are chunked by
+# the SDK/wallet inside the opaque payload; the relay never reassembles.
+frame_cap_bytes = 1048576
+
+# Undelivered publishes are held this long for a topic with no subscribers.
+mailbox_ttl_secs = 300
+
+# Mailbox depth per topic (oldest dropped first when full).
+mailbox_max_frames = 64
+
+# Abuse limits.
+max_topics_per_conn = 8
+max_conns_per_ip = 32
+rate_limit_frames_per_sec = 20.0
+rate_burst = 40.0
+idle_timeout_secs = 900
+
+# Server-originated WebSocket ping interval (0 disables). Keeps idle subscriber
+# connections alive through Cloudflare/nginx; clients answer pongs automatically.
+keepalive_ping_secs = 30

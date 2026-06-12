@@ -1,0 +1,14 @@
+# Deployment shape for the pha server (Cloudflare proxied -> nginx -> this container).
+# nginx proxies /relay to localhost:7200; the port stays bound to the loopback so the
+# relay is never reachable except through the vhost.
+services:
+  relay:
+    build: .
+    container_name: phantasma-link-relay
+    restart: unless-stopped
+    ports:
+      - "localhost:7200:7200"
+    volumes:
+      - ./config.docker.toml:/etc/phantasma-link-relay/config.toml:ro
+    environment:
+      RUST_LOG: info
