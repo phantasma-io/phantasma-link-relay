@@ -1,3 +1,7 @@
 # Container config: inside docker the relay must bind all interfaces of the container
 # netns; isolation comes from the compose port mapping pinning it to the host loopback.
 bind = "0.0.0.0:7200"
+
+# Behind nginx every connection arrives from the proxy's loopback address, so this cap
+# acts as the relay's GLOBAL concurrent-connection ceiling, not a per-client limit.
+max_conns_per_ip = 4096

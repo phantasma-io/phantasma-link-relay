@@ -7,8 +7,15 @@ services:
     container_name: phantasma-link-relay
     restart: unless-stopped
     ports:
-      - "localhost:7200:7200"
+      # Docker port bindings accept only IP literals (no hostnames), so this is the
+      # one place the loopback must be spelled numerically.
+      - "127.0.0.1:7200:7200"
     volumes:
       - ./config.docker.toml:/etc/phantasma-link-relay/config.toml:ro
     environment:
       RUST_LOG: info
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

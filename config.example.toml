@@ -3,7 +3,7 @@
 #   phantasma-link-relay config.toml
 
 # Plain-WS listen address. TLS terminates at the reverse proxy on link.phantasma.info
-# (see the hosting kit Caddyfile); never expose this port directly.
+# (nginx vhost, Cloudflare in front); never expose this port directly.
 bind = "localhost:7200"
 
 # Per-frame byte cap (spec section 18: 1 MiB). Larger logical messages are chunked by
