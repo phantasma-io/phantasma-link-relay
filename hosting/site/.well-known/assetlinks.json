@@ -1,0 +1,14 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.Phantasma.PoltergeistLite",
+      "sha256_cert_fingerprints": [
+        "BB:E4:FC:C8:BD:CB:3F:75:58:F6:73:C1:A2:D7:E7:EB:7B:7E:63:11:08:A2:8E:CC:85:AF:71:11:6C:B9:0A:2F",
+        "91:AB:98:80:20:B1:7B:C9:5F:3A:65:6D:06:1A:66:12:16:99:D2:74:4A:5B:F7:46:6E:38:5E:34:55:77:D9:AC",
+        "2F:6E:AD:BB:81:87:02:FA:73:27:1B:3C:4F:AA:96:D6:7D:D0:4A:72:30:C8:2F:30:F6:24:7A:CD:B2:07:84:9E"
+      ]
+    }
+  }
+]

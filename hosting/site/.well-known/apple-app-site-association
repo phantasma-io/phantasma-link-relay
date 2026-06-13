@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["7R2J3NZ6FK.id.phantasmaphoenix.poltergeistlite"],
+        "components": [
+          { "/": "/v5/*", "comment": "Phantasma Link v5: pair, req, wake deeplinks" }
+        ]
+      }
+    ]
+  }
+}

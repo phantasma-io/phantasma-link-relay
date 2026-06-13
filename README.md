@@ -23,7 +23,7 @@ section 6.4 (transport role).
   the clients), per-connection rate limit and topic cap, per-IP connection cap, idle
   timeout, periodic mailbox sweep.
 - **Plain WS on localhost**: TLS terminates at the reverse proxy of
-  link.phantasma.info (the hosting kit's Caddyfile carries the commented mount).
+  link.phantasma.info (see `hosting/` for the nginx vhost and static site files).
 
 ## Wire format
 

@@ -24,3 +24,6 @@ target
 # Added by cargo
 
 /target
+
+# Server-local compose overrides (host-specific, e.g. network_mode); never committed.
+docker-compose.override.yml

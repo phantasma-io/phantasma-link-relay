@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phantasma Link</title>
+<style>
+  body { font: 17px/1.5 system-ui, sans-serif; margin: 0; padding: 3em 1.5em; text-align: center; color: #1a1a2e; }
+  h1 { font-size: 1.4em; }
+  p { max-width: 34em; margin: 0.8em auto; }
+  a.button, button { display: inline-block; margin-top: 1.2em; padding: 0.8em 1.6em; border: 0; border-radius: 8px;
+    background: #6c4bd8; color: #fff; font-size: 1em; text-decoration: none; cursor: pointer; }
+  .muted { color: #777; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<h1>This link opens in the Poltergeist Lite wallet</h1>
+<p>The wallet app does not seem to be installed on this device, so the link opened in the browser instead.</p>
+<p><a class="button" href="https://phantasma.info" id="get-wallet">Get the wallet</a></p>
+<p><button id="open-wallet">I already have the wallet</button></p>
+<p class="muted">Nothing from this link is sent to the server: the sensitive part travels in the URL fragment, which stays on this device.</p>
+<script>
+// Graceful retry for an installed-but-unverified wallet: rebuild the same deeplink on the
+// custom scheme (the fragment, which carries the actual material, is preserved verbatim).
+document.getElementById('open-wallet').addEventListener('click', function () {
+  location.href = 'phantasma:/' + location.pathname + location.hash;
+});
+</script>
+</body>
+</html>
