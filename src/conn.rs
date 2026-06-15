@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 use axum::extract::ws::{Message, WebSocket};
 use futures_util::{SinkExt, StreamExt};
 use tokio::sync::mpsc;
-use tracing::debug;
+use tracing::info;
 
 use crate::config::RelayConfig;
 use crate::hub::Hub;
@@ -95,23 +95,31 @@ pub async fn run_connection(
     let mut bucket = TokenBucket::new(config.rate_limit_frames_per_sec, config.rate_burst);
     let idle = Duration::from_secs(config.idle_timeout_secs);
     let mut subscribed: Vec<String> = Vec::new();
+    // Why the loop ended, for the "conn closed" log line. Defaults to a clean peer close.
+    let mut close_reason = "peer_closed";
 
     loop {
         // Idle gate counts ANY inbound traffic (pings included: axum answers them and
         // still yields the message here), so a quiet-but-alive subscriber survives.
         let message = match tokio::time::timeout(idle, ws_rx.next()).await {
             Err(_) => {
-                debug!(conn_id, "idle timeout");
+                close_reason = "idle_timeout";
                 break;
             }
-            Ok(None) => break,         // peer closed the TCP/WS stream
-            Ok(Some(Err(_))) => break, // protocol error (incl. oversized ws frame)
+            Ok(None) => break, // peer closed the TCP/WS stream
+            Ok(Some(Err(_))) => {
+                close_reason = "ws_error";
+                break;
+            }
             Ok(Some(Ok(message))) => message,
         };
 
         let text = match message {
             Message::Text(text) => text,
-            Message::Close(_) => break,
+            Message::Close(_) => {
+                close_reason = "close_frame";
+                break;
+            }
             // Pings/pongs are connection upkeep, not protocol frames; binary is not
             // part of the relay protocol and is ignored rather than fatal.
             Message::Ping(_) | Message::Pong(_) | Message::Binary(_) => continue,
@@ -193,11 +201,13 @@ pub async fn run_connection(
                     continue;
                 }
                 hub.subscribe(&topic, conn_id, out_tx.clone());
+                info!(conn_id, topic = %topic, "subscribe");
                 subscribed.push(topic);
             }
 
             ClientFrame::Unsubscribe { topic } => {
                 hub.unsubscribe(&topic, conn_id);
+                info!(conn_id, topic = %topic, "unsubscribe");
                 subscribed.retain(|t| t != &topic);
             }
 
@@ -220,7 +230,12 @@ pub async fn run_connection(
                     payload: &payload,
                 }
                 .to_json();
-                hub.publish(&topic, conn_id, deliver);
+                let bytes = deliver.len();
+                let delivered = hub.publish(&topic, conn_id, deliver);
+                // Routing visibility (permanent): delivered = live subscribers that got it;
+                // 0 means it went to the TTL mailbox (no peer subscribed right now). This is
+                // the line that shows whether a dApp request actually reached the wallet.
+                info!(conn_id, topic = %topic, bytes, delivered, "publish");
                 // Ack = accepted (delivered now or mailboxed); the publisher does not
                 // learn HOW many peers got it, that is session-layer business.
                 send(
@@ -238,7 +253,12 @@ pub async fn run_connection(
     hub.drop_connection(conn_id, &subscribed);
     drop(out_tx); // closes the queue; the writer drains and sends Close
     let _ = writer.await;
-    debug!(conn_id, "connection closed");
+    info!(
+        conn_id,
+        reason = close_reason,
+        topics = subscribed.len(),
+        "conn closed"
+    );
 }
 
 async fn send(out_tx: &mpsc::Sender<String>, frame: ServerFrame<'_>) {

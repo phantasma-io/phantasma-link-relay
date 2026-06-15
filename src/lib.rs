@@ -94,6 +94,7 @@ async fn ws_handler(
         .max_message_size(config.frame_cap_bytes + 1024)
         .max_frame_size(config.frame_cap_bytes + 1024)
         .on_upgrade(move |socket| async move {
+            info!(conn_id, %ip, "conn open");
             conn::run_connection(socket, conn_id, hub, config).await;
             // Connection accounting must outlive the protocol loop, whatever way it ends.
             let mut conns = conns_per_ip.lock().expect("ip map lock");
